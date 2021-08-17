@@ -1,4 +1,9 @@
-from sklearn.model_selection StratifiedKFold, GridSearchCV
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
@@ -57,7 +62,7 @@ def define_hyperparameters(random_state = 42):
     return classifier, classifier_param
 
 
-def find_best_classifiers(classifier, classifier_param):
+def find_best_classifiers(X_train, y_train, classifier, classifier_param):
     '''
     Train the classifers and find the best parameter
     INPUT:
@@ -94,7 +99,7 @@ def plot_classifiers(cv_result):
     sns.barplot("Cross Validation Means", "ML Models", data = cv_df)
     plt.savefig('./images/classifier/classifiers_mean_acc.png')
 
-def train_ensemble_model(cv_result, classifier, classifier_param, X_train, y_train):
+def train_ensemble_model(best_estimators, X_train, y_train):
     '''
     Train ensemble model using voting classifier
     INPUT:
@@ -107,3 +112,5 @@ def train_ensemble_model(cv_result, classifier, classifier_param, X_train, y_tra
                                         ("rfc",best_estimators[2])],
                                         voting = "hard", n_jobs = -1)
     ensemble_model = ensemble_model.fit(X_train, y_train)
+
+    return ensemble_model

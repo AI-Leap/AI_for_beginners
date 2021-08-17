@@ -1,9 +1,11 @@
+import pandas as pd
+
 from keras import callbacks
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Input, BatchNormalization
 from keras import optimizers
 
-def build_model():
+def build_model(input_shape):
     '''
     Build neural network for classification
     Output:
@@ -11,7 +13,7 @@ def build_model():
     '''
 
     model = Sequential([
-        Input(shape=(X_train.shape[1])),
+        Input(shape=(input_shape)),
         Dense(32, activation='relu'),
         Dropout(0.3),
         BatchNormalization(),
@@ -27,7 +29,7 @@ def build_model():
     ])
     return model
 
-def train(X_train, y_train, X_valid, y_valid, model, batch_size, epochs):
+def train(model, X_train, y_train, X_valid, y_valid, batch_size, epochs):
     '''
     Compile and fit the model using Adam optimizer
     INPUT:
@@ -46,5 +48,8 @@ def train(X_train, y_train, X_valid, y_valid, model, batch_size, epochs):
     )
 
     df_plot = pd.DataFrame(history.history)
-    df_plot.plot(figsize=(10,5))
-    df_plot.savefig('./images/classifier/classifiers_mean_acc.png')
+    plot = df_plot.plot(figsize=(10,5))
+    fig = plot.get_figure()
+    fig.savefig('./images/classifiers/classifiers_mean_acc.png')
+    
+    return model

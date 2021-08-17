@@ -1,17 +1,9 @@
-
 import numpy as np
 import pandas as pd
 import os
-
 import explore_data, feature_engineering, train_with_ML_algos, train_with_nn
 os.environ['QT_QPA_PLATFORM'] = 'offscreen'
 
-from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier, VotingClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, f1_score, classification_report
 
 def read_data(path):
@@ -59,6 +51,13 @@ def perform_data_exploration(data_frame):
     # explore_data.display_countplot('Title', data_frame, 'title_countplot.png') 
 
 def perform_feature_engineering(data_frame):
+    '''
+    Perform feature engineering like data preprocessing, data preparation for model training and 
+    INPUT:
+        data_frame: pandas dataframe
+    OUTPUT:
+        train_test_valid_data: data for training, testing, and validation
+    '''
 
     print('DATA PREPROCESSING ...')
     data_frame = feature_engineering.preprocess_embarked(data_frame)
@@ -89,7 +88,7 @@ def evaluate_model(model, X_valid, y_valid):
     print("Classification Report:")
     print(classification_report(y_valid, y_pred))
 
-def evaluate_and_save_submission(model, test_data):
+def evaluate_save_test_result(model, test_data):
     '''
     Evaluate the performance and save the submission file
     Input:
@@ -101,7 +100,8 @@ def evaluate_and_save_submission(model, test_data):
     y_pred = pd.Series(list(model.predict_classes(test_data)), name = "Survived").astype(int)
     results = pd.concat([test_passengerId, y_pred],axis = 1)
     
-    results.to_csv("submission.csv", index = False)
+    results.to_csv("test_result.csv", index = False)
+    print('The Result File was successfully saved ------')
 
 if __name__ == '__main__':
     df_train = read_data('train.csv')
@@ -120,5 +120,20 @@ if __name__ == '__main__':
         X_train.shape, y_train.shape, X_valid.shape, y_valid.shape
     ))
 
-    model = build_model()
-    model.summary()
+    #train with ensemble model
+    # classifier, classifier_param = train_with_ML_algos.define_hyperparameters(random_state = 42)
+    # cv_result, best_estimators = train_with_ML_algos.find_best_classifiers(X_train, y_train, classifier, classifier_param)
+    # train_with_ML_algos.plot_classifiers(cv_result)
+    # model = train_with_ML_algos.train_ensemble_model(best_estimators, X_train, y_train)
+
+
+    #train with neural network
+    model = train_with_nn.build_model(X_train.shape[1])
+    print(model.summary())
+
+    batch_size = 32
+    epochs = 400
+
+    model = train_with_nn.train(model, X_train, y_train, X_valid, y_valid, batch_size, epochs)
+    evaluate_model(model, X_valid, y_valid)
+    evaluate_save_test_result(model, test)
